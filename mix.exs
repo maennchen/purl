@@ -70,7 +70,8 @@ defmodule Purl.MixProject do
       {:ssl_verify_fun, "~> 1.1",
        manager: :rebar3, only: [:test], runtime: false, override: true},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:credo, "~> 1.0", only: [:dev], runtime: false}
+      {:credo, "~> 1.0", only: [:dev], runtime: false},
+      {:jason, "~> 1.4", only: [:dev, :test]}
     ]
   end
 end

@@ -17,7 +17,6 @@
           #
           ## Consistency Checks
           #
-          {Credo.Check.Consistency.ExceptionNames, []},
           {Credo.Check.Consistency.LineEndings, []},
           {Credo.Check.Consistency.ParameterPatternMatching, []},
           {Credo.Check.Consistency.SpaceAroundOperators, []},
@@ -82,7 +81,6 @@
           {Credo.Check.Refactor.FilterCount, []},
           {Credo.Check.Refactor.FilterFilter, []},
           {Credo.Check.Refactor.RejectReject, []},
-          {Credo.Check.Refactor.RedundantWithClauseResult, []},
 
           #
           ## Warnings
@@ -123,7 +121,6 @@
           {Credo.Check.Readability.SinglePipe, []},
           {Credo.Check.Readability.Specs, [include_defp: true]},
           {Credo.Check.Readability.StrictModuleLayout, []},
-          {Credo.Check.Refactor.ABCSize, []},
           {Credo.Check.Refactor.AppendSingleItem, []},
           {Credo.Check.Refactor.DoubleBooleanNegation, []},
           {Credo.Check.Refactor.IoPuts, []},
@@ -135,6 +132,16 @@
         ],
         disabled: [
           #
+          ## Consistency Checks
+          #
+          {Credo.Check.Consistency.ExceptionNames, []},
+
+          #
+          ## Refactoring Opportunities
+          #
+          {Credo.Check.Refactor.RedundantWithClauseResult, []},
+
+          #
           # Controversial and experimental checks (opt-in, just move the check to `:enabled`
           #   and be sure to use `mix credo --strict` to see low priority checks)
           #
@@ -144,6 +151,7 @@
           {Credo.Check.Readability.SingleFunctionToBlockPipe, []},
           {Credo.Check.Readability.WithCustomTaggedTuple, []},
           {Credo.Check.Readability.OnePipePerLine, []},
+          {Credo.Check.Refactor.ABCSize, []},
           {Credo.Check.Refactor.FilterReject, []},
           {Credo.Check.Refactor.MapMap, []},
           {Credo.Check.Refactor.ModuleDependencies, []},
