@@ -2,7 +2,7 @@
 defmodule Purl.MixProject do
   use Mix.Project
 
-  @version "0.0.0-dev"
+  @version "0.1.0"
   @source_url "https://github.com/jshmrtn/purl"
   @description "Implementation of the purl (package url) specification"
 
