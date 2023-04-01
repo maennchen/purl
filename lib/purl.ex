@@ -173,15 +173,15 @@ defmodule Purl do
   @spec to_string(purl :: t()) :: String.t()
   def to_string(%Purl{} = purl), do: purl |> to_uri() |> URI.to_string()
 
-  # @doc """
-  # Converts a purl to a `URI`
+  @doc """
+  Converts a purl to a `URI`
 
-  # ## Examples
+  ## Examples
 
-  #     iex> Purl.to_uri(%Purl{type: "hex", name: "purl"})
-  #     %URI{scheme: "pkg", path: "hex/purl"}
+      iex> Purl.to_uri(%Purl{type: "hex", name: "purl"})
+      %URI{scheme: "pkg", path: "hex/purl"}
 
-  # """
+  """
   @spec to_uri(purl :: t()) :: URI.t()
   defdelegate to_uri(purl), to: Composer, as: :compose_uri
 
