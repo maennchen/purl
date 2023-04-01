@@ -11,7 +11,13 @@ See [the documentation][docs].
 
 ## Usage
 
-TODO
+```elixir
+iex> Purl.new("pkg:hex/purl")
+{:ok, %Purl{type: "hex", name: "purl"}}
+
+iex> Purl.to_string(%Purl{type: "hex", name: "purl"})
+"pkg:hex/purl"
+```
 
 ## Installation
 
