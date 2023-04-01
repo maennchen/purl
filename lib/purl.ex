@@ -36,6 +36,7 @@ defmodule Purl do
 
   alias Purl.Composer
   alias Purl.Parser
+  alias Purl.Resource
   alias Purl.SpecialCase
 
   # credo:disable-for-next-line Credo.Check.Warning.SpecWithStruct
@@ -225,6 +226,19 @@ defmodule Purl do
       {:error, reason} -> raise reason
     end
   end
+
+  @doc """
+  Convert known URLs to purl
+
+  ## Currently Supported
+
+  * GitHub: Repository HTTP / Git URL, Project URL
+  * BitBucket: Repository HTTTP / Git URL, Project URL
+  * Hex.pm package URL
+
+  """
+  @spec from_resource_uri(uri :: String.t() | URI.t()) :: {:ok, Purl.t()} | :error
+  defdelegate from_resource_uri(uri), to: Resource
 
   defimpl String.Chars do
     @impl String.Chars
