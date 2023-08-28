@@ -2,8 +2,8 @@
 
 [![hex.pm badge](https://img.shields.io/badge/Package%20on%20hex.pm-informational)](https://hex.pm/packages/purl)
 [![Documentation badge](https://img.shields.io/badge/Documentation-ff69b4)][docs]
-[![.github/workflows/branch_main.yml](https://github.com/jshmrtn/purl/actions/workflows/branch_main.yml/badge.svg)](https://github.com/jshmrtn/purl/actions/workflows/branch_main.yml)
-[![Coverage Status](https://coveralls.io/repos/github/jshmrtn/purl/badge.svg?branch=main)](https://coveralls.io/github/jshmrtn/purl?branch=main)
+[![.github/workflows/branch_main.yml](https://github.com/maennchen/purl/actions/workflows/branch_main.yml/badge.svg)](https://github.com/maennchen/purl/actions/workflows/branch_main.yml)
+[![Coverage Status](https://coveralls.io/repos/github/maennchen/purl/badge.svg?branch=main)](https://coveralls.io/github/maennchen/purl?branch=main)
 
 > Implementation of the purl (package url) specification.
 

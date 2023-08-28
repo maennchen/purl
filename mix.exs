@@ -3,7 +3,7 @@ defmodule Purl.MixProject do
   use Mix.Project
 
   @version "0.1.1"
-  @source_url "https://github.com/jshmrtn/purl"
+  @source_url "https://github.com/maennchen/purl"
   @description "Implementation of the purl (package url) specification"
 
   def project do
