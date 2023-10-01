@@ -23,7 +23,7 @@ jobs:
       MIX_ENV: dev
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: erlef/setup-beam@v1
         id: setupBEAM
         with:
@@ -69,7 +69,7 @@ jobs:
       MIX_ENV: test
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
       - uses: erlef/setup-beam@v1
@@ -110,7 +110,7 @@ jobs:
       MIX_ENV: dev
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: erlef/setup-beam@v1
         id: setupBEAM
         with:
@@ -143,7 +143,7 @@ jobs:
       DIALYZER_PLT_PRIV: true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: erlef/setup-beam@v1
         id: setupBEAM
         with:
@@ -188,7 +188,7 @@ jobs:
       DIALYZER_PLT_PRIV: true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: erlef/setup-beam@v1
         id: setupBEAM
         with:
