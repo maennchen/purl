@@ -41,7 +41,7 @@ defmodule Purl.MixProject do
       maintainers: ["Jonatan Männchen"],
       links: %{
         "GitHub" => @source_url,
-        "Changelog" => @source_url <> "/blob/main/CHANGELOG.md",
+        "Changelog" => @source_url <> "/releases",
         "Issues" => @source_url <> "/issues",
         "purl Specification" => "https://github.com/package-url/purl-spec"
       }
