@@ -1,6 +1,9 @@
 defmodule Purl.Parser do
   @moduledoc false
 
+  alias Purl.Error.InvalidField
+  alias Purl.Error.InvalidScheme
+
   @spec parse(purl :: String.t() | URI.t() | Purl.t()) ::
           {:ok, Purl.t()} | {:error, Purl.parse_error()}
   def parse(purl)
@@ -15,27 +18,17 @@ defmodule Purl.Parser do
     end
   end
 
-  def parse(%URI{scheme: nil} = _uri), do: {:error, %Purl.Error.InvalidScheme{scheme: nil}}
+  def parse(%URI{scheme: nil} = _uri), do: {:error, %InvalidScheme{scheme: nil}}
 
-  def parse(%URI{scheme: scheme} = _uri) when scheme != "pkg",
-    do: {:error, %Purl.Error.InvalidScheme{scheme: scheme}}
+  def parse(%URI{scheme: scheme} = _uri) when scheme != "pkg", do: {:error, %InvalidScheme{scheme: scheme}}
 
   def parse(%URI{scheme: "pkg", authority: type, path: path} = uri) when type != nil,
-    do: parse(%URI{uri | authority: nil, path: type <> "/" <> path})
+    do: parse(%{uri | authority: nil, path: type <> "/" <> path})
 
   def parse(%URI{scheme: "pkg", host: type, path: path} = uri) when type != nil,
-    do: parse(%URI{uri | host: nil, path: type <> "/" <> path})
+    do: parse(%{uri | host: nil, path: type <> "/" <> path})
 
-  def parse(
-        %URI{
-          scheme: "pkg",
-          authority: nil,
-          host: nil,
-          path: path,
-          fragment: fragment,
-          query: query
-        } = _uri
-      ) do
+  def parse(%URI{scheme: "pkg", authority: nil, host: nil, path: path, fragment: fragment, query: query} = _uri) do
     with {:ok, {type, namespace, name, version}} <- parse_path(path),
          {:ok, qualifiers} <- parse_query(query) do
       parse(%Purl{
@@ -54,14 +47,8 @@ defmodule Purl.Parser do
   end
 
   def parse(
-        %Purl{
-          type: type,
-          namespace: namespace,
-          name: name,
-          version: version,
-          qualifiers: qualifiers,
-          subpath: subpath
-        } = _purl
+        %Purl{type: type, namespace: namespace, name: name, version: version, qualifiers: qualifiers, subpath: subpath} =
+          _purl
       ) do
     with {:ok, type} <- parse_type(type),
          {:ok, namespace} <- parse_namespace(namespace),
@@ -102,7 +89,7 @@ defmodule Purl.Parser do
         {:ok, {type, namespace, name, version}}
 
       [_one] ->
-        {:error, %Purl.Error.InvalidField{field: :name, value: ""}}
+        {:error, %InvalidField{field: :name, value: ""}}
     end
   end
 
@@ -126,17 +113,17 @@ defmodule Purl.Parser do
   end
 
   @spec parse_type(type :: String.t()) ::
-          {:ok, Purl.type()} | {:error, Purl.Error.InvalidField.t()}
+          {:ok, Purl.type()} | {:error, InvalidField.t()}
   defp parse_type(type) when is_binary(type) do
     if Regex.match?(~r/^[a-zA-Z\.\+\-][a-zA-Z0-9\.\+\-]+$/, type) do
       {:ok, type}
     else
-      {:error, %Purl.Error.InvalidField{field: :type, value: type}}
+      {:error, %InvalidField{field: :type, value: type}}
     end
   end
 
   @spec parse_namespace(namespace :: [String.t()]) ::
-          {:ok, Purl.namespace()} | {:error, Purl.Error.InvalidField.t()}
+          {:ok, Purl.namespace()} | {:error, InvalidField.t()}
   defp parse_namespace(namespace) when is_list(namespace) do
     namespace
     |> Enum.reduce_while({:ok, []}, fn
@@ -153,19 +140,18 @@ defmodule Purl.Parser do
   end
 
   @spec parse_namespace_segment(segment :: String.t()) ::
-          {:ok, Purl.namespace_segment()} | {:error, Purl.Error.InvalidField.t()}
+          {:ok, Purl.namespace_segment()} | {:error, InvalidField.t()}
   defp parse_namespace_segment(segment)
 
-  defp parse_namespace_segment(""),
-    do: {:error, %Purl.Error.InvalidField{field: :namespace, value: ""}}
+  defp parse_namespace_segment(""), do: {:error, %InvalidField{field: :namespace, value: ""}}
 
   defp parse_namespace_segment(segment) do
     cond do
       !String.valid?(segment) ->
-        {:error, %Purl.Error.InvalidField{field: :namespace, value: segment}}
+        {:error, %InvalidField{field: :namespace, value: segment}}
 
       String.contains?(segment, "/") ->
-        {:error, %Purl.Error.InvalidField{field: :namespace, value: segment}}
+        {:error, %InvalidField{field: :namespace, value: segment}}
 
       true ->
         {:ok, segment}
@@ -173,20 +159,20 @@ defmodule Purl.Parser do
   end
 
   @spec parse_name(name :: String.t()) ::
-          {:ok, Purl.name()} | {:error, Purl.Error.InvalidField.t()}
+          {:ok, Purl.name()} | {:error, InvalidField.t()}
   defp parse_name(name)
-  defp parse_name(""), do: {:error, %Purl.Error.InvalidField{field: :name, value: ""}}
+  defp parse_name(""), do: {:error, %InvalidField{field: :name, value: ""}}
 
   defp parse_name(name) when is_binary(name) do
     if String.valid?(name) do
       {:ok, name}
     else
-      {:error, %Purl.Error.InvalidField{field: :name, value: name}}
+      {:error, %InvalidField{field: :name, value: name}}
     end
   end
 
   @spec parse_version(version :: Version.t() | String.t() | nil) ::
-          {:ok, Purl.version() | nil} | {:error, Purl.Error.InvalidField.t()}
+          {:ok, Purl.version() | nil} | {:error, InvalidField.t()}
   defp parse_version(version)
   defp parse_version(nil), do: {:ok, nil}
   defp parse_version(%Version{} = version), do: {:ok, version}
@@ -195,12 +181,12 @@ defmodule Purl.Parser do
     if String.valid?(version) do
       {:ok, version}
     else
-      {:error, %Purl.Error.InvalidField{field: :version, value: version}}
+      {:error, %InvalidField{field: :version, value: version}}
     end
   end
 
   @spec parse_qualifiers(qualifiers :: %{optional(String.t()) => String.t()}) ::
-          {:ok, Purl.qualifiers()} | {:error, Purl.Error.InvalidField.t()}
+          {:ok, Purl.qualifiers()} | {:error, InvalidField.t()}
   defp parse_qualifiers(%{} = qualifiers) do
     Enum.reduce_while(qualifiers, {:ok, %{}}, fn {qualifier_key, qualifier_value}, {:ok, acc} ->
       with {:ok, qualifier_key} <- parse_qualifier_key(qualifier_key),
@@ -213,37 +199,35 @@ defmodule Purl.Parser do
   end
 
   @spec parse_qualifier_key(qualifier_key :: String.t()) ::
-          {:ok, Purl.qualifier_key()} | {:error, Purl.Error.InvalidField.t()}
+          {:ok, Purl.qualifier_key()} | {:error, InvalidField.t()}
   defp parse_qualifier_key(qualifier_key)
 
-  defp parse_qualifier_key(""),
-    do: {:error, %Purl.Error.InvalidField{field: :qualifiers, value: ""}}
+  defp parse_qualifier_key(""), do: {:error, %InvalidField{field: :qualifiers, value: ""}}
 
   defp parse_qualifier_key(qualifier_key) do
     if Regex.match?(~r/^[a-zA-Z\.\-\_][a-zA-Z0-9\.\-\_]+$/, qualifier_key) do
       {:ok, qualifier_key}
     else
-      {:error, %Purl.Error.InvalidField{field: :qualifiers, value: qualifier_key}}
+      {:error, %InvalidField{field: :qualifiers, value: qualifier_key}}
     end
   end
 
   @spec parse_qualifier_value(qualifier_value :: String.t()) ::
-          {:ok, Purl.qualifier_value()} | {:error, Purl.Error.InvalidField.t()}
+          {:ok, Purl.qualifier_value()} | {:error, InvalidField.t()}
   defp parse_qualifier_value(qualifier_value)
 
-  defp parse_qualifier_value(""),
-    do: {:error, %Purl.Error.InvalidField{field: :qualifiers, value: ""}}
+  defp parse_qualifier_value(""), do: {:error, %InvalidField{field: :qualifiers, value: ""}}
 
   defp parse_qualifier_value(qualifier_value) do
     if String.valid?(qualifier_value) do
       {:ok, qualifier_value}
     else
-      {:error, %Purl.Error.InvalidField{field: :qualifiers, value: qualifier_value}}
+      {:error, %InvalidField{field: :qualifiers, value: qualifier_value}}
     end
   end
 
   @spec parse_subpath(subpath :: [String.t()]) ::
-          {:ok, Purl.subpath()} | {:error, Purl.Error.InvalidField.t()}
+          {:ok, Purl.subpath()} | {:error, InvalidField.t()}
   defp parse_subpath(subpath) when is_list(subpath) do
     subpath
     |> Enum.reduce_while({:ok, []}, fn
@@ -261,7 +245,7 @@ defmodule Purl.Parser do
   end
 
   @spec parse_subpath_segment(segment :: String.t()) ::
-          {:ok, Purl.subpath_segment()} | {:error, Purl.Error.InvalidField.t()}
+          {:ok, Purl.subpath_segment()} | {:error, InvalidField.t()}
   defp parse_subpath_segment(segment)
 
   defp parse_subpath_segment(segment) when segment in ["", ".", ".."], do: :skip
@@ -270,7 +254,7 @@ defmodule Purl.Parser do
     if String.valid?(segment) do
       {:ok, segment}
     else
-      {:error, %Purl.Error.InvalidField{field: :subpath, value: segment}}
+      {:error, %InvalidField{field: :subpath, value: segment}}
     end
   end
 end

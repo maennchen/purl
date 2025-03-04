@@ -63,15 +63,12 @@ defmodule Purl.MixProject do
 
   defp deps do
     [
-      {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.5", only: [:test], runtime: false},
-      # TODO: Remove when the following PR is merged & released:
-      # https://github.com/deadtrickster/ssl_verify_fun.erl/pull/27
-      {:ssl_verify_fun, "~> 1.1",
-       manager: :rebar3, only: [:test], runtime: false, override: true},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:credo, "~> 1.0", only: [:dev], runtime: false},
-      {:jason, "~> 1.4", only: [:dev, :test]}
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:excoveralls, "~> 0.5", only: [:test], runtime: false},
+      {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
+      {:jason, "~> 1.4", only: [:dev, :test]},
+      {:styler, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 end

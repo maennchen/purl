@@ -44,7 +44,6 @@
           {Credo.Check.Readability.AliasOrder, []},
           {Credo.Check.Readability.FunctionNames, []},
           {Credo.Check.Readability.LargeNumbers, []},
-          {Credo.Check.Readability.MaxLineLength, [priority: :low, max_length: 120]},
           {Credo.Check.Readability.ModuleAttributeNames, []},
           {Credo.Check.Readability.ModuleDoc, []},
           {Credo.Check.Readability.ModuleNames, []},
@@ -161,6 +160,12 @@
           {Credo.Check.Warning.LazyLogging, []},
           {Credo.Check.Warning.MixEnv, []},
           {Credo.Check.Refactor.MapInto, []},
+
+          #
+          ## Readability Checks
+          #
+          # Handled by :styler
+          {Credo.Check.Readability.MaxLineLength, [priority: :low, max_length: 120]},
 
           #
           # Custom checks can be created using `mix credo.gen.check`.
