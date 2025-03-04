@@ -23,7 +23,7 @@ defmodule Purl.Composer do
             [
               case version do
                 nil -> name
-                version -> "#{name}@#{URI.encode(version)}"
+                version -> "#{name}@#{encode_version(version)}"
               end
             ],
           "/"
@@ -53,4 +53,7 @@ defmodule Purl.Composer do
         "=" <> URI.encode(value, &(&1 == ?/ or URI.char_unescaped?(&1)))
     end)
   end
+
+  @spec encode_version(version :: String.t()) :: String.t()
+  defp encode_version(version), do: URI.encode(version, &URI.char_unreserved?/1)
 end

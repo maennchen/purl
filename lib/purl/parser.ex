@@ -47,7 +47,7 @@ defmodule Purl.Parser do
         subpath:
           case fragment do
             nil -> []
-            fragment -> fragment |> String.trim("/") |> String.split("/")
+            fragment -> fragment |> URI.decode() |> String.trim("/") |> String.split("/")
           end
       })
     end
@@ -249,6 +249,7 @@ defmodule Purl.Parser do
     |> Enum.reduce_while({:ok, []}, fn
       segment, {:ok, acc} ->
         case parse_subpath_segment(segment) do
+          :skip -> {:cont, {:ok, acc}}
           {:ok, segment} -> {:cont, {:ok, [segment | acc]}}
           {:error, reason} -> {:halt, {:error, reason}}
         end
@@ -263,8 +264,7 @@ defmodule Purl.Parser do
           {:ok, Purl.subpath_segment()} | {:error, Purl.Error.InvalidField.t()}
   defp parse_subpath_segment(segment)
 
-  defp parse_subpath_segment(segment) when segment in ["", ".", ".."],
-    do: {:error, %Purl.Error.InvalidField{field: :subpath, value: segment}}
+  defp parse_subpath_segment(segment) when segment in ["", ".", ".."], do: :skip
 
   defp parse_subpath_segment(segment) when is_binary(segment) do
     if String.valid?(segment) do
