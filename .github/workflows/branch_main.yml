@@ -10,14 +10,8 @@ jobs:
     name: "Test"
 
     uses: ./.github/workflows/part_test.yml
-    with:
-      elixirVersion: "1.14.3"
-      otpVersion: "25.3"
 
   docs:
     name: "Docs"
 
     uses: ./.github/workflows/part_docs.yml
-    with:
-      elixirVersion: "1.14.3"
-      otpVersion: "25.3"
