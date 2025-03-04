@@ -86,17 +86,20 @@ defmodule PurlTest do
               qualifiers -> qualifiers
             end
 
-          subpath = String.split(subpath || "", "/", trim: true)
+          subpath =
+            String.split(subpath || "", "/", trim: true)
+            |> Enum.reject(&(&1 in ["", ".", ".."]))
 
-          assert {:ok,
-                  %Purl{
-                    type: ^type,
-                    namespace: ^namespace,
-                    name: ^name,
-                    version: ^version,
-                    qualifiers: ^qualifiers,
-                    subpath: ^subpath
-                  } = parsed} = Purl.new(unquote(purl))
+          assert {:ok, parsed} = Purl.new(unquote(purl))
+
+          assert %Purl{
+                   type: type,
+                   namespace: namespace,
+                   name: name,
+                   version: version,
+                   qualifiers: qualifiers,
+                   subpath: subpath
+                 } == parsed
 
           assert canonical == Purl.to_string(parsed)
         end

@@ -40,7 +40,8 @@ defmodule Purl.SpecialCase do
          {:ok, purl} <- normalize_name(purl),
          {:ok, purl} <- downcase_version(purl),
          {:ok, purl} <- version_required(purl),
-         {:ok, purl} <- conan_enforce_channel(purl) do
+         {:ok, purl} <- conan_enforce_channel(purl),
+         {:ok, purl} <- cpan_verify_distribution(purl) do
       {:ok, purl}
     end
   end
@@ -165,4 +166,44 @@ defmodule Purl.SpecialCase do
        }}
 
   defp conan_enforce_channel(purl), do: {:ok, purl}
+
+  @spec cpan_verify_distribution(purl :: Purl.t()) ::
+          {:ok, Purl.t()} | {:error, Purl.Error.SpecialCaseFailed.t()}
+  defp cpan_verify_distribution(purl)
+
+  defp cpan_verify_distribution(
+         %Purl{
+           type: "cpan",
+           namespace: [],
+           name: name
+         } = purl
+       ) do
+    if String.contains?(name, "-") do
+      {:error,
+       %Purl.Error.SpecialCaseFailed{
+         message: "cpan modules must not contain \"-\""
+       }}
+    else
+      {:ok, purl}
+    end
+  end
+
+  defp cpan_verify_distribution(
+         %Purl{
+           type: "cpan",
+           namespace: [_ | _] = namespace,
+           name: name
+         } = purl
+       ) do
+    if String.contains?(name, "::") do
+      {:error,
+       %Purl.Error.SpecialCaseFailed{
+         message: "cpan distribution name must not contain \"::\""
+       }}
+    else
+      {:ok, %Purl{purl | namespace: Enum.map(namespace, &String.upcase/1)}}
+    end
+  end
+
+  defp cpan_verify_distribution(purl), do: {:ok, purl}
 end
