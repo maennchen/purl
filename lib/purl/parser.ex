@@ -227,7 +227,7 @@ defmodule Purl.Parser do
   end
 
   @spec parse_subpath(subpath :: [String.t()]) ::
-          {:ok, Purl.subpath()} | :skip | {:error, InvalidField.t()}
+          {:ok, Purl.subpath()} | {:error, InvalidField.t()}
   defp parse_subpath(subpath) when is_list(subpath) do
     subpath
     |> Enum.reduce_while({:ok, []}, fn
@@ -245,7 +245,7 @@ defmodule Purl.Parser do
   end
 
   @spec parse_subpath_segment(segment :: String.t()) ::
-          {:ok, Purl.subpath_segment()} | {:error, InvalidField.t()}
+          {:ok, Purl.subpath_segment()} | :skip | {:error, InvalidField.t()}
   defp parse_subpath_segment(segment)
 
   defp parse_subpath_segment(segment) when segment in ["", ".", ".."], do: :skip
