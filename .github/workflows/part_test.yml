@@ -1,12 +1,5 @@
 on:
-  workflow_call:
-    inputs:
-      elixirVersion:
-        required: true
-        type: string
-      otpVersion:
-        required: true
-        type: string
+  workflow_call: {}
 
 name: "Test"
 
@@ -27,8 +20,8 @@ jobs:
       - uses: erlef/setup-beam@v1
         id: setupBEAM
         with:
-          otp-version: ${{ inputs.otpVersion }}
-          elixir-version: ${{ inputs.elixirVersion }}
+          version-file: .tool-versions
+          version-type: strict
       - uses: actions/cache@v4
         with:
           path: deps
@@ -57,11 +50,8 @@ jobs:
           - otp: '25.3'
             elixir: '1.14'
             runs-on: ubuntu-latest
-          - otp: '25.3'
-            elixir: 'main'
-            runs-on: ubuntu-latest
-          - otp: '${{ inputs.otpVersion }}'
-            elixir: '${{ inputs.elixirVersion }}'
+          - otp: '27.2.4'
+            elixir: '1.18.2'
             runs-on: ubuntu-latest
             enable_coverage_export: 'true'
 
@@ -114,8 +104,8 @@ jobs:
       - uses: erlef/setup-beam@v1
         id: setupBEAM
         with:
-          otp-version: ${{ inputs.otpVersion }}
-          elixir-version: ${{ inputs.elixirVersion }}
+          version-file: .tool-versions
+          version-type: strict
       - uses: actions/cache@v4
         with:
           path: deps
@@ -147,8 +137,8 @@ jobs:
       - uses: erlef/setup-beam@v1
         id: setupBEAM
         with:
-          otp-version: ${{ inputs.otpVersion }}
-          elixir-version: ${{ inputs.elixirVersion }}
+          version-file: .tool-versions
+          version-type: strict
       - uses: actions/cache@v4
         with:
           path: deps
@@ -192,8 +182,8 @@ jobs:
       - uses: erlef/setup-beam@v1
         id: setupBEAM
         with:
-          otp-version: ${{ inputs.otpVersion }}
-          elixir-version: ${{ inputs.elixirVersion }}
+          version-file: .tool-versions
+          version-type: strict
       - uses: actions/cache@v4
         with:
           path: deps

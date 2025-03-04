@@ -197,9 +197,8 @@ defmodule Purl do
   @spec new(purl :: String.t() | URI.t() | Purl.t()) ::
           {:ok, Purl.t()} | {:error, parse_error() | Purl.Error.SpecialCaseFailed.t()}
   def new(purl) do
-    with {:ok, purl} <- Parser.parse(purl),
-         {:ok, purl} <- SpecialCase.apply(purl) do
-      {:ok, purl}
+    with {:ok, purl} <- Parser.parse(purl) do
+      SpecialCase.apply(purl)
     end
   end
 

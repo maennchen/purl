@@ -20,14 +20,7 @@ defmodule Purl.Resource do
       end
   end
 
-  def from_resource_uri(%URI{
-        scheme: "https",
-        host: "github.com",
-        port: 443,
-        path: path,
-        query: nil,
-        fragment: nil
-      }) do
+  def from_resource_uri(%URI{scheme: "https", host: "github.com", port: 443, path: path, query: nil, fragment: nil}) do
     path = path |> String.trim_trailing(".git") |> String.trim("/")
 
     case String.split(path, "/") do
@@ -36,12 +29,7 @@ defmodule Purl.Resource do
     end
   end
 
-  def from_resource_uri(%URI{
-        scheme: "git+ssh",
-        userinfo: "git",
-        host: "github.com",
-        path: path
-      }) do
+  def from_resource_uri(%URI{scheme: "git+ssh", userinfo: "git", host: "github.com", path: path}) do
     path = path |> String.trim_trailing(".git") |> String.trim("/")
 
     case String.split(path, "/") do
@@ -50,14 +38,7 @@ defmodule Purl.Resource do
     end
   end
 
-  def from_resource_uri(%URI{
-        scheme: "https",
-        host: "bitbucket.org",
-        port: 443,
-        path: path,
-        query: nil,
-        fragment: nil
-      }) do
+  def from_resource_uri(%URI{scheme: "https", host: "bitbucket.org", port: 443, path: path, query: nil, fragment: nil}) do
     path = path |> String.trim_trailing(".git") |> String.trim("/")
 
     case String.split(path, "/") do
@@ -69,12 +50,7 @@ defmodule Purl.Resource do
     end
   end
 
-  def from_resource_uri(%URI{
-        scheme: "git+ssh",
-        userinfo: "git",
-        host: "bitbucket.org",
-        path: path
-      }) do
+  def from_resource_uri(%URI{scheme: "git+ssh", userinfo: "git", host: "bitbucket.org", path: path}) do
     path = path |> String.trim_trailing(".git") |> String.trim("/")
 
     case String.split(path, "/") do

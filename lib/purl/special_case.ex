@@ -1,6 +1,8 @@
 defmodule Purl.SpecialCase do
   @moduledoc false
 
+  alias Purl.Error.SpecialCaseFailed
+
   @rules %{
     "bitbucket" => %{
       name_case_sensitive: false,
@@ -32,7 +34,7 @@ defmodule Purl.SpecialCase do
   }
 
   @spec apply(purl :: Purl.t()) ::
-          {:ok, Purl.t()} | {:error, Purl.Error.SpecialCaseFailed.t()}
+          {:ok, Purl.t()} | {:error, SpecialCaseFailed.t()}
   def apply(purl) do
     with {:ok, purl} <- downcase_namespace(purl),
          {:ok, purl} <- enforce_namespace_length(purl),
@@ -40,9 +42,8 @@ defmodule Purl.SpecialCase do
          {:ok, purl} <- normalize_name(purl),
          {:ok, purl} <- downcase_version(purl),
          {:ok, purl} <- version_required(purl),
-         {:ok, purl} <- conan_enforce_channel(purl),
-         {:ok, purl} <- cpan_verify_distribution(purl) do
-      {:ok, purl}
+         {:ok, purl} <- conan_enforce_channel(purl) do
+      cpan_verify_distribution(purl)
     end
   end
 
@@ -51,13 +52,13 @@ defmodule Purl.SpecialCase do
 
   for {type, %{namespace_case_sensitive: false}} <- @rules do
     defp downcase_namespace(%Purl{type: unquote(type), namespace: namespace} = purl),
-      do: {:ok, %Purl{purl | namespace: Enum.map(namespace, &String.downcase/1)}}
+      do: {:ok, %{purl | namespace: Enum.map(namespace, &String.downcase/1)}}
   end
 
   defp downcase_namespace(purl), do: {:ok, purl}
 
   @spec enforce_namespace_length(purl :: Purl.t()) ::
-          {:ok, Purl.t()} | {:error, Purl.Error.SpecialCaseFailed.t()}
+          {:ok, Purl.t()} | {:error, SpecialCaseFailed.t()}
   defp enforce_namespace_length(purl)
 
   for {type, %{namespace_min_length: min_length}} <- @rules do
@@ -65,7 +66,7 @@ defmodule Purl.SpecialCase do
       if length(namespace) >= unquote(min_length) do
         {:ok, purl}
       else
-        {:error, %Purl.Error.SpecialCaseFailed{message: "namespace missing"}}
+        {:error, %SpecialCaseFailed{message: "namespace missing"}}
       end
     end
   end
@@ -76,17 +77,13 @@ defmodule Purl.SpecialCase do
   defp downcase_name(purl)
 
   for {type, %{name_case_sensitive: false}} <- @rules do
-    defp downcase_name(%Purl{type: unquote(type), name: name} = purl),
-      do: {:ok, %Purl{purl | name: String.downcase(name)}}
+    defp downcase_name(%Purl{type: unquote(type), name: name} = purl), do: {:ok, %{purl | name: String.downcase(name)}}
   end
 
-  defp downcase_name(
-         %Purl{type: "mlflow", name: name, qualifiers: %{"repository_url" => repository_url}} =
-           purl
-       ) do
+  defp downcase_name(%Purl{type: "mlflow", name: name, qualifiers: %{"repository_url" => repository_url}} = purl) do
     with {:ok, %URI{host: host}} <- URI.new(repository_url),
          true <- String.ends_with?(host, "azuredatabricks.net") do
-      {:ok, %Purl{purl | name: String.downcase(name)}}
+      {:ok, %{purl | name: String.downcase(name)}}
     else
       _other -> {:ok, purl}
     end
@@ -99,7 +96,7 @@ defmodule Purl.SpecialCase do
 
   for {type, %{name_normalize: :hyphen_case}} <- @rules do
     defp normalize_name(%Purl{type: unquote(type), name: name} = purl),
-      do: {:ok, %Purl{purl | name: String.replace(name, "_", "-")}}
+      do: {:ok, %{purl | name: String.replace(name, "_", "-")}}
   end
 
   defp normalize_name(purl), do: {:ok, purl}
@@ -108,79 +105,51 @@ defmodule Purl.SpecialCase do
   defp downcase_version(purl)
 
   for {type, %{version_case_sensitive: false}} <- @rules do
-    defp downcase_version(%Purl{type: unquote(type), version: version} = purl)
-         when is_binary(version),
-         do: {:ok, %Purl{purl | version: String.downcase(version)}}
+    defp downcase_version(%Purl{type: unquote(type), version: version} = purl) when is_binary(version),
+      do: {:ok, %{purl | version: String.downcase(version)}}
 
     defp downcase_version(%Purl{type: unquote(type), version: %Version{} = version} = purl),
-      do:
-        {:ok,
-         %Purl{
-           purl
-           | version: version |> Version.to_string() |> String.downcase() |> Version.parse!()
-         }}
+      do: {:ok, %{purl | version: version |> Version.to_string() |> String.downcase() |> Version.parse!()}}
   end
 
   defp downcase_version(purl), do: {:ok, purl}
 
   @spec version_required(purl :: Purl.t()) ::
-          {:ok, Purl.t()} | {:error, Purl.Error.SpecialCaseFailed.t()}
+          {:ok, Purl.t()} | {:error, SpecialCaseFailed.t()}
   defp version_required(purl)
 
   for {type, %{version_required: true}} <- @rules do
     defp version_required(%Purl{type: unquote(type), version: nil} = _purl),
-      do: {:error, %Purl.Error.SpecialCaseFailed{message: "version missing"}}
+      do: {:error, %SpecialCaseFailed{message: "version missing"}}
   end
 
   defp version_required(purl), do: {:ok, purl}
 
   @spec conan_enforce_channel(purl :: Purl.t()) ::
-          {:ok, Purl.t()} | {:error, Purl.Error.SpecialCaseFailed.t()}
+          {:ok, Purl.t()} | {:error, SpecialCaseFailed.t()}
   defp conan_enforce_channel(purl)
 
-  defp conan_enforce_channel(
-         %Purl{
-           type: "conan",
-           namespace: [_one | _rest],
-           qualifiers: qualifiers
-         } = purl
-       )
+  defp conan_enforce_channel(%Purl{type: "conan", namespace: [_one | _rest], qualifiers: qualifiers} = purl)
        when is_map_key(qualifiers, "channel"),
        do: {:ok, purl}
 
-  defp conan_enforce_channel(
-         %Purl{
-           type: "conan",
-           namespace: [],
-           qualifiers: qualifiers
-         } = purl
-       )
+  defp conan_enforce_channel(%Purl{type: "conan", namespace: [], qualifiers: qualifiers} = purl)
        when not is_map_key(qualifiers, "channel"),
        do: {:ok, purl}
 
   defp conan_enforce_channel(%Purl{type: "conan"}),
-    do:
-      {:error,
-       %Purl.Error.SpecialCaseFailed{
-         message: "either namespace & channel must both be present or both be absent"
-       }}
+    do: {:error, %SpecialCaseFailed{message: "either namespace & channel must both be present or both be absent"}}
 
   defp conan_enforce_channel(purl), do: {:ok, purl}
 
   @spec cpan_verify_distribution(purl :: Purl.t()) ::
-          {:ok, Purl.t()} | {:error, Purl.Error.SpecialCaseFailed.t()}
+          {:ok, Purl.t()} | {:error, SpecialCaseFailed.t()}
   defp cpan_verify_distribution(purl)
 
-  defp cpan_verify_distribution(
-         %Purl{
-           type: "cpan",
-           namespace: [],
-           name: name
-         } = purl
-       ) do
+  defp cpan_verify_distribution(%Purl{type: "cpan", namespace: [], name: name} = purl) do
     if String.contains?(name, "-") do
       {:error,
-       %Purl.Error.SpecialCaseFailed{
+       %SpecialCaseFailed{
          message: "cpan modules must not contain \"-\""
        }}
     else
@@ -188,20 +157,14 @@ defmodule Purl.SpecialCase do
     end
   end
 
-  defp cpan_verify_distribution(
-         %Purl{
-           type: "cpan",
-           namespace: [_ | _] = namespace,
-           name: name
-         } = purl
-       ) do
+  defp cpan_verify_distribution(%Purl{type: "cpan", namespace: [_one | _rest] = namespace, name: name} = purl) do
     if String.contains?(name, "::") do
       {:error,
-       %Purl.Error.SpecialCaseFailed{
+       %SpecialCaseFailed{
          message: "cpan distribution name must not contain \"::\""
        }}
     else
-      {:ok, %Purl{purl | namespace: Enum.map(namespace, &String.upcase/1)}}
+      {:ok, %{purl | namespace: Enum.map(namespace, &String.upcase/1)}}
     end
   end
 

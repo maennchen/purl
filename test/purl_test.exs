@@ -87,7 +87,8 @@ defmodule PurlTest do
             end
 
           subpath =
-            String.split(subpath || "", "/", trim: true)
+            (subpath || "")
+            |> String.split("/", trim: true)
             |> Enum.reject(&(&1 in ["", ".", ".."]))
 
           assert {:ok, parsed} = Purl.new(unquote(purl))

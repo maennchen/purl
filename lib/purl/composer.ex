@@ -5,7 +5,7 @@ defmodule Purl.Composer do
   def compose_uri(purl)
 
   def compose_uri(%Purl{version: %Version{} = version} = purl),
-    do: compose_uri(%Purl{purl | version: Version.to_string(version)})
+    do: compose_uri(%{purl | version: Version.to_string(version)})
 
   def compose_uri(%Purl{
         type: type,
@@ -29,11 +29,11 @@ defmodule Purl.Composer do
           "/"
         ),
       query:
-        unless qualifiers == %{} do
+        if qualifiers != %{} do
           encode_qualifiers(qualifiers)
         end,
       fragment:
-        unless subpath == [] do
+        if subpath != [] do
           Enum.join(subpath, "/")
         end
     }

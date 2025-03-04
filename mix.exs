@@ -2,7 +2,7 @@
 defmodule Purl.MixProject do
   use Mix.Project
 
-  @version "0.1.1"
+  @version "0.1.2"
   @source_url "https://github.com/maennchen/purl"
   @description "Implementation of the purl (package url) specification"
 
@@ -41,7 +41,7 @@ defmodule Purl.MixProject do
       maintainers: ["Jonatan Männchen"],
       links: %{
         "GitHub" => @source_url,
-        "Changelog" => @source_url <> "/blob/main/CHANGELOG.md",
+        "Changelog" => @source_url <> "/releases",
         "Issues" => @source_url <> "/issues",
         "purl Specification" => "https://github.com/package-url/purl-spec"
       }
@@ -63,15 +63,12 @@ defmodule Purl.MixProject do
 
   defp deps do
     [
-      {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.5", only: [:test], runtime: false},
-      # TODO: Remove when the following PR is merged & released:
-      # https://github.com/deadtrickster/ssl_verify_fun.erl/pull/27
-      {:ssl_verify_fun, "~> 1.1",
-       manager: :rebar3, only: [:test], runtime: false, override: true},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:credo, "~> 1.0", only: [:dev], runtime: false},
-      {:jason, "~> 1.4", only: [:dev, :test]}
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:excoveralls, "~> 0.5", only: [:test], runtime: false},
+      {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
+      {:jason, "~> 1.4", only: [:dev, :test]},
+      {:styler, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 end
