@@ -83,7 +83,7 @@ defmodule Purl.Parser do
         {name, version} =
           case String.split(name, "@", parts: 2) do
             [name, version] -> {URI.decode(name), URI.decode(version)}
-            [name] -> {name, nil}
+            [name] -> {URI.decode(name), nil}
           end
 
         {:ok, {type, namespace, name, version}}
@@ -115,7 +115,7 @@ defmodule Purl.Parser do
   @spec parse_type(type :: String.t()) ::
           {:ok, Purl.type()} | {:error, InvalidField.t()}
   defp parse_type(type) when is_binary(type) do
-    if Regex.match?(~r/^[a-zA-Z\.\+\-][a-zA-Z0-9\.\+\-]+$/, type) do
+    if Regex.match?(~r/^[a-zA-Z\.\+\-][a-zA-Z0-9\.\+\-]*$/, type) do
       {:ok, type}
     else
       {:error, %InvalidField{field: :type, value: type}}
@@ -130,6 +130,7 @@ defmodule Purl.Parser do
       segment, {:ok, acc} ->
         case parse_namespace_segment(segment) do
           {:ok, segment} -> {:cont, {:ok, [segment | acc]}}
+          :skip -> {:cont, {:ok, acc}}
           {:error, reason} -> {:halt, {:error, reason}}
         end
     end)
@@ -140,10 +141,10 @@ defmodule Purl.Parser do
   end
 
   @spec parse_namespace_segment(segment :: String.t()) ::
-          {:ok, Purl.namespace_segment()} | {:error, InvalidField.t()}
+          {:ok, Purl.namespace_segment()} | :skip | {:error, InvalidField.t()}
   defp parse_namespace_segment(segment)
 
-  defp parse_namespace_segment(""), do: {:error, %InvalidField{field: :namespace, value: ""}}
+  defp parse_namespace_segment(""), do: :skip
 
   defp parse_namespace_segment(segment) do
     cond do
@@ -193,6 +194,7 @@ defmodule Purl.Parser do
            {:ok, qualifier_value} <- parse_qualifier_value(qualifier_value) do
         {:cont, {:ok, Map.put(acc, qualifier_key, qualifier_value)}}
       else
+        :skip -> {:cont, {:ok, acc}}
         error -> {:halt, error}
       end
     end)
@@ -205,7 +207,7 @@ defmodule Purl.Parser do
   defp parse_qualifier_key(""), do: {:error, %InvalidField{field: :qualifiers, value: ""}}
 
   defp parse_qualifier_key(qualifier_key) do
-    if Regex.match?(~r/^[a-zA-Z\.\-\_][a-zA-Z0-9\.\-\_]+$/, qualifier_key) do
+    if Regex.match?(~r/^[a-zA-Z\.\-\_][a-zA-Z0-9\.\-\_]*$/, qualifier_key) do
       {:ok, qualifier_key}
     else
       {:error, %InvalidField{field: :qualifiers, value: qualifier_key}}
@@ -213,10 +215,10 @@ defmodule Purl.Parser do
   end
 
   @spec parse_qualifier_value(qualifier_value :: String.t()) ::
-          {:ok, Purl.qualifier_value()} | {:error, InvalidField.t()}
+          {:ok, Purl.qualifier_value()} | :skip | {:error, InvalidField.t()}
   defp parse_qualifier_value(qualifier_value)
 
-  defp parse_qualifier_value(""), do: {:error, %InvalidField{field: :qualifiers, value: ""}}
+  defp parse_qualifier_value(""), do: :skip
 
   defp parse_qualifier_value(qualifier_value) do
     if String.valid?(qualifier_value) do

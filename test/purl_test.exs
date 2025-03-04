@@ -1,5 +1,6 @@
 defmodule PurlTest do
   use ExUnit.Case, async: true
+  use ExUnitProperties
 
   doctest Purl
 
@@ -104,6 +105,28 @@ defmodule PurlTest do
 
           assert canonical == Purl.to_string(parsed)
         end
+      end
+    end
+  end
+
+  describe "fuzzer" do
+    property "compose / parse gives same result" do
+      check all(purl <- Purl.Generator.purl()) do
+        # Uppercase fields should still parse, but the canonical form is lowercase
+        comparison = %{
+          purl
+          | type: String.downcase(purl.type),
+            qualifiers: Map.new(purl.qualifiers, fn {key, value} -> {String.downcase(key), value} end),
+            version:
+              case purl.version do
+                %Version{} = version -> Version.to_string(version)
+                string when is_binary(string) -> string
+              end
+        }
+
+        canonical = Purl.to_string(purl)
+
+        assert {:ok, comparison} == Purl.new(canonical)
       end
     end
   end
