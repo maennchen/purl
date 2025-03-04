@@ -50,9 +50,6 @@ jobs:
           - otp: '25.3'
             elixir: '1.14'
             runs-on: ubuntu-latest
-          - otp: '25.3'
-            elixir: 'main'
-            runs-on: ubuntu-latest
           - otp: '27.2.4'
             elixir: '1.18.2'
             runs-on: ubuntu-latest
