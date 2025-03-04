@@ -46,7 +46,7 @@ defmodule Purl.Composer do
     end)
   end
 
-  @spec encode_name(name :: Purl.name()) :: [String.t()]
+  @spec encode_name(name :: Purl.name()) :: String.t()
   defp encode_name(name) do
     URI.encode(name, &(&1 != ?@ and URI.char_unescaped?(&1)))
   end
