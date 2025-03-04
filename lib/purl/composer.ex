@@ -22,8 +22,8 @@ defmodule Purl.Composer do
           [type | encode_namespace(namespace)] ++
             [
               case version do
-                nil -> name
-                version -> "#{name}@#{encode_version(version)}"
+                nil -> encode_name(name)
+                version -> "#{encode_name(name)}@#{encode_version(version)}"
               end
             ],
           "/"
@@ -44,6 +44,11 @@ defmodule Purl.Composer do
     Enum.map(namespace, fn namespace_segment ->
       URI.encode(namespace_segment, &(&1 != ?@ and URI.char_unescaped?(&1)))
     end)
+  end
+
+  @spec encode_name(name :: Purl.name()) :: String.t()
+  defp encode_name(name) do
+    URI.encode(name, &(&1 != ?@ and URI.char_unescaped?(&1)))
   end
 
   @spec encode_qualifiers(qualifiers :: Purl.qualifiers()) :: String.t()

@@ -82,7 +82,7 @@ defmodule Purl.Parser do
 
         {name, version} =
           case String.split(name, "@", parts: 2) do
-            [name, version] -> {name, URI.decode(version)}
+            [name, version] -> {URI.decode(name), URI.decode(version)}
             [name] -> {name, nil}
           end
 
