@@ -68,6 +68,7 @@ defmodule Purl.MixProject do
       {:excoveralls, "~> 0.5", only: [:test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
       {:jason, "~> 1.4", only: [:dev, :test]},
+      {:stream_data, "~> 1.1", optional: true},
       {:styler, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
