@@ -60,7 +60,7 @@ defmodule Purl.Composer do
   end
 
   @spec encode_version(version :: String.t()) :: String.t()
-  defp encode_version(version), do: encode(version, [?:, ?/])
+  defp encode_version(version), do: encode(version, [?/])
 
   @spec encode_subpath(subpath :: Purl.subpath()) :: String.t() | nil
   defp encode_subpath(subpath)
