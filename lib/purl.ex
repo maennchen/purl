@@ -249,7 +249,7 @@ defmodule Purl do
 
     @impl Inspect
     def inspect(%Purl{} = purl, opts) do
-      concat(["Purl.parse!(", to_doc(Purl.to_string(purl), opts), ")"])
+      concat(["Purl.new!(", to_doc(Purl.to_string(purl), opts), ")"])
     end
   end
 end

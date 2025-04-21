@@ -21,11 +21,24 @@ defmodule PurlTest do
                 subpath: ["path", "to", "directory"]
               }} = Purl.new("pkg:hex/name/space/purl@1.0.0?key=value#/path/to/directory/")
     end
-  end
 
-  describe inspect(&Purl.new!/1) do
-    test "should return a purl for a string" do
-      assert %Purl{type: "hex", name: "purl"} = Purl.new!("pkg:hex/purl")
+    test "throws error on duplicate qualifiers" do
+      assert_raise Purl.Error.DuplicateQualifier, fn ->
+        Purl.new!("pkg:hex/purl?foo=bar&foo=bar")
+      end
+    end
+
+    test "throws error on invalid schema" do
+      assert %Purl{} = Purl.new!("pkg:hex/purl")
+      assert %Purl{} = Purl.new!("PKG:hex/purl")
+
+      assert_raise Purl.Error.InvalidScheme, fn ->
+        Purl.new!("pkgs:hex/purl")
+      end
+    end
+
+    test "fixes url with protocol" do
+      assert Purl.new!("pkg:hex/purl") == Purl.new!("pkg://hex/purl")
     end
   end
 
@@ -125,8 +138,15 @@ defmodule PurlTest do
         }
 
         canonical = Purl.to_string(purl)
+        to_string = to_string(purl)
+        inspected = inspect(purl, printable_limit: 1_000)
 
         assert {:ok, comparison} == Purl.new(canonical)
+        assert {:ok, comparison} == Purl.new(to_string)
+
+        if String.length(canonical) <= 1000 do
+          assert {comparison, []} == Code.eval_string(inspected)
+        end
       end
     end
   end
