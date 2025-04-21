@@ -15,3 +15,11 @@ jobs:
     name: "Docs"
 
     uses: ./.github/workflows/part_docs.yml
+
+  dependency_submission:
+    name: "Mix Dependency Submission"
+
+    permissions:
+      contents: write
+
+    uses: ./.github/workflows/part_dependency_submission.yml
