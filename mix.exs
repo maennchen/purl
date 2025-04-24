@@ -5,7 +5,7 @@ defmodule Purl.MixProject do
   {:ok, [{:application, :purl, props}]} = :file.consult(~c"src/purl.app.src")
   @props Keyword.take(props, [:applications, :description, :env, :mod, :licenses, :vsn])
 
-  @source_url "https://github.com/maennchen/purl"
+  @source_url "https://github.com/erlef/purl"
 
   def project do
     [

@@ -2,9 +2,9 @@
 
 [![hex.pm badge](https://img.shields.io/badge/Package%20on%20hex.pm-informational)](https://hex.pm/packages/purl)
 [![Documentation badge](https://img.shields.io/badge/Documentation-ff69b4)][docs]
-[![.github/workflows/branch_main.yml](https://github.com/maennchen/purl/actions/workflows/branch_main.yml/badge.svg)](https://github.com/maennchen/purl/actions/workflows/branch_main.yml)
-[![Coverage Status](https://coveralls.io/repos/github/maennchen/purl/badge.svg?branch=main)](https://coveralls.io/github/maennchen/purl?branch=main)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/maennchen/purl/badge)](https://scorecard.dev/viewer/?uri=github.com/maennchen/purl)
+[![.github/workflows/branch_main.yml](https://github.com/erlef/purl/actions/workflows/branch_main.yml/badge.svg)](https://github.com/erlef/purl/actions/workflows/branch_main.yml)
+[![Coverage Status](https://coveralls.io/repos/github/erlef/purl/badge.svg?branch=main)](https://coveralls.io/github/erlef/purl?branch=main)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/erlef/purl/badge)](https://scorecard.dev/viewer/?uri=github.com/erlef/purl)
 
 > Implementation of the purl (package url) specification.
 
