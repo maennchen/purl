@@ -73,6 +73,7 @@ jobs:
             mix-${{ runner.os }}-${{ env.MIX_ENV }}-${{ steps.setupBEAM.outputs.elixir-version }}-${{ steps.setupBEAM.outputs.otp-version }}-
       - run: mix deps.get
       - run: mix deps.compile
+      - run: mix compile --warning-as-errors
       - run: mix format --check-formatted
 
   rebar_format:
