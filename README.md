@@ -12,6 +12,10 @@ See [the documentation][docs].
 
 ## Usage
 
+<!-- tabs-open -->
+
+### Elixir
+
 ```elixir
 iex> Purl.new("pkg:hex/purl")
 {:ok, %Purl{type: "hex", name: "purl"}}
@@ -20,18 +24,23 @@ iex> Purl.to_string(%Purl{type: "hex", name: "purl"})
 "pkg:hex/purl"
 ```
 
-## Installation
+### Erlang
 
-The package can be installed by adding `purl` to your list of dependencies in
-`mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:purl, "~> 0.3.0-beta"}
-  ]
-end
+To handle the purl record, first include the header:
+```erlang
+-include_lib("purl/include/purl.hrl").
 ```
+
+
+```erlang
+> purl:new("pkg:hex/purl").
+{ok, #purl{type = <<"hex">>, name = <<"purl">>}}
+
+> purl:to_string(#purl{type = <<"hex">>, name = <<"purl">>})
+<<"pkg:hex/purl">>
+```
+
+<!-- tabs-close -->
 
 ## License
 
