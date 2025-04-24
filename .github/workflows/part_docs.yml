@@ -63,11 +63,11 @@ jobs:
       - name: "Attest docs provenance"
         uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
         id: attest-docs-provenance
-        if: "${{ github.event.inputs.attest }}"
+        if: github.event.inputs.attest == 'true'
         with:
           subject-path: 'docs.tar.gz'
       - name: "Copy docs provenance"
-        if: "${{ github.event.inputs.attest }}"
+        if: github.event.inputs.attest == 'true'
         run: cp "$ATTESTATION" docs.tar.gz.sigstore
         env:
           ATTESTATION: "${{ steps.attest-docs-provenance.outputs.bundle-path }}"
