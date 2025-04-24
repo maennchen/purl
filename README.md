@@ -28,7 +28,7 @@ The package can be installed by adding `purl` to your list of dependencies in
 ```elixir
 def deps do
   [
-    {:purl, "~> 0.1.0"}
+    {:purl, "~> 0.3.0-beta"}
   ]
 end
 ```
