@@ -1,0 +1,10 @@
+{application, purl, [
+    {description, "Implementation of the purl (package url) specification"},
+    {vsn, "0.2.0"},
+    {registered, []},
+    {applications, [kernel, stdlib]},
+    {env, []},
+    {modules, []},
+    {licenses, ["Apache-2.0"]},
+    {links, []}
+]}.

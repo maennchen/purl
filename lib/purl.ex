@@ -34,17 +34,22 @@ defmodule Purl do
   > ```
   """
 
-  alias Purl.Composer
-  alias Purl.Parser
-  alias Purl.Resource
-  alias Purl.SpecialCase
+  alias Purl.Error.DuplicateQualifier
+  alias Purl.Error.InvalidField
+  alias Purl.Error.InvalidScheme
+  alias Purl.Error.SpecialCaseFailed
+
+  require Record
+
+  Record.defrecordp(:purl, Record.extract(:purl, from: "include/purl.hrl"))
 
   # credo:disable-for-next-line Credo.Check.Warning.SpecWithStruct
   @type parse_error ::
           %URI.Error{}
-          | Purl.Error.InvalidField.t()
-          | Purl.Error.DuplicateQualifier.t()
-          | Purl.Error.InvalidScheme.t()
+          | InvalidField.t()
+          | DuplicateQualifier.t()
+          | InvalidScheme.t()
+          | SpecialCaseFailed.t()
 
   @typedoc """
   the package "type" or package "protocol" such as `maven`, `npm`, `nuget`,
@@ -60,7 +65,7 @@ defmodule Purl do
   * The type must NOT be percent-encoded
   * The type is case insensitive. The canonical form is lowercase
   """
-  @type type :: String.t()
+  @type type :: :purl.type()
 
   @typedoc """
   Segment of the namespace
@@ -73,7 +78,7 @@ defmodule Purl do
   `repository_url` qualifier. Note however that for some types, the namespace
   may look like a host.
   """
-  @type namespace_segment :: String.t()
+  @type namespace_segment :: :purl.namespace_segment()
 
   @typedoc """
   some name prefix such as a Maven groupid, a Docker image owner, a GitHub user
@@ -81,12 +86,12 @@ defmodule Purl do
 
   The values are type-specific.
   """
-  @type namespace :: [namespace_segment()]
+  @type namespace :: :purl.namespace()
 
   @typedoc """
   the name of the package
   """
-  @type name :: String.t()
+  @type name :: :purl.name()
 
   @typedoc """
   the version of the package
@@ -96,7 +101,7 @@ defmodule Purl do
   define a procedure to compare and sort versions, but there is no reliable and
   uniform way to do such comparison consistently.
   """
-  @type version :: Version.t() | String.t()
+  @type version :: :purl.version() | Version.t()
 
   @typedoc """
   qualifier key
@@ -109,7 +114,7 @@ defmodule Purl do
   * A key is case insensitive. The canonical form is lowercase
   * A key cannot contains spaces
   """
-  @type qualifier_key :: String.t()
+  @type qualifier_key :: :purl.qualifier_key()
 
   @typedoc """
   qualifier value
@@ -118,7 +123,7 @@ defmodule Purl do
   * value cannot be an empty string: a key=value pair with an empty value is the
   same as no key/value at all for this key
   """
-  @type qualifier_value :: String.t()
+  @type qualifier_value :: :purl.qualifier_value()
 
   @typedoc """
   extra qualifying data for a package such as an OS, architecture, a distro,
@@ -129,7 +134,7 @@ defmodule Purl do
   ## Validation
   * key must be unique within the keys of the qualifiers string
   """
-  @type qualifiers :: %{optional(qualifier_key()) => qualifier_value()}
+  @type qualifiers :: :purl.qualifiers()
 
   @typedoc """
   subpath segment
@@ -139,12 +144,12 @@ defmodule Purl do
   * must not be any of '..' or '.'
   * must not be empty
   """
-  @type subpath_segment :: String.t()
+  @type subpath_segment :: :purl.subpath_segment()
 
   @typedoc """
   extra subpath within a package, relative to the package root
   """
-  @type subpath :: [subpath_segment()]
+  @type subpath :: :purl.subpath()
 
   @typedoc """
   Package URL struct
@@ -171,7 +176,7 @@ defmodule Purl do
 
   """
   @spec to_string(purl :: t()) :: String.t()
-  def to_string(%Purl{} = purl), do: purl |> to_uri() |> URI.to_string()
+  def to_string(%Purl{} = purl), do: purl |> Purl.to_record() |> :purl.to_binary()
 
   @doc """
   Converts a purl to a `URI`
@@ -183,7 +188,7 @@ defmodule Purl do
 
   """
   @spec to_uri(purl :: t()) :: URI.t()
-  defdelegate to_uri(purl), to: Composer, as: :compose_uri
+  def to_uri(%Purl{} = purl), do: purl |> Purl.to_record() |> :purl.to_uri() |> then(&struct!(URI, &1))
 
   @doc """
   Creates a new purl struct from a `Purl`, `URI` or string.
@@ -194,13 +199,10 @@ defmodule Purl do
       {:ok, %Purl{type: "hex", name: "purl"}}
 
   """
-  @spec new(purl :: String.t() | URI.t() | Purl.t()) ::
-          {:ok, Purl.t()} | {:error, parse_error() | Purl.Error.SpecialCaseFailed.t()}
-  def new(purl) do
-    with {:ok, purl} <- Parser.parse(purl) do
-      SpecialCase.apply(purl)
-    end
-  end
+  @spec new(purl :: String.t() | URI.t() | t()) :: {:ok, t()} | {:error, parse_error()}
+  def new(purl)
+  def new(%Purl{} = purl), do: purl |> to_record() |> :purl.new() |> purl_response()
+  def new(purl), do: purl |> :purl.new() |> purl_response()
 
   @doc """
   Similar to `new/1` but raises `URI.Error`, `Purl.Error.InvalidField` or
@@ -218,7 +220,7 @@ defmodule Purl do
       ** (Purl.Error.InvalidField) invalid field type, \"hex*\" given
 
   """
-  @spec new!(purl :: String.t() | URI.t() | Purl.t()) :: Purl.t()
+  @spec new!(purl :: String.t() | URI.t() | t()) :: t()
   def new!(purl) do
     case new(purl) do
       {:ok, purl} -> purl
@@ -236,8 +238,69 @@ defmodule Purl do
   * Hex.pm package URL
 
   """
-  @spec from_resource_uri(uri :: String.t() | URI.t()) :: {:ok, Purl.t()} | :error
-  defdelegate from_resource_uri(uri), to: Resource
+  @spec from_resource_uri(uri :: String.t() | URI.t()) :: {:ok, t()} | :error
+  def from_resource_uri(uri)
+  def from_resource_uri(%URI{} = uri), do: from_resource_uri(URI.to_string(uri))
+  def from_resource_uri(uri), do: uri |> :purl.from_resource_uri() |> purl_response()
+
+  @doc false
+  @spec to_record(purl :: t()) :: :purl.t()
+  def to_record(%Purl{} = purl) do
+    version =
+      case purl.version do
+        nil -> :undefined
+        %Version{} = version -> Version.to_string(version)
+        version -> version
+      end
+
+    purl(
+      type: purl.type,
+      name: purl.name,
+      namespace: purl.namespace,
+      version: version,
+      qualifiers: purl.qualifiers,
+      subpath: purl.subpath
+    )
+  end
+
+  @doc false
+  @spec from_record(:purl.t()) :: t()
+  def from_record(purl) do
+    version =
+      case purl(purl, :version) do
+        :undefined -> nil
+        version -> version
+      end
+
+    %Purl{
+      type: purl(purl, :type),
+      name: purl(purl, :name),
+      namespace: purl(purl, :namespace),
+      version: version,
+      qualifiers: purl(purl, :qualifiers),
+      subpath: purl(purl, :subpath)
+    }
+  end
+
+  @doc false
+  @spec purl_response(response :: {:ok, :purl.t()} | :purl.parse_error() | :error) ::
+          {:ok, t()} | {:error, parse_error()} | :error
+  defp purl_response(response)
+  defp purl_response({:ok, purl}), do: {:ok, from_record(purl)}
+
+  defp purl_response({:error, {:invalid_field, field, value}}),
+    do: {:error, InvalidField.exception(field: field, value: value)}
+
+  defp purl_response({:error, {:invalid_scheme, scheme}}), do: {:error, InvalidScheme.exception(scheme: scheme)}
+  defp purl_response({:error, {:duplicate_qualifier, key}}), do: {:error, DuplicateQualifier.exception(key: key)}
+
+  defp purl_response({:error, {:special_case_failed, message}}),
+    do: {:error, SpecialCaseFailed.exception(message: message)}
+
+  defp purl_response({:error, reason, term}),
+    do: {:error, %URI.Error{action: :parse, reason: reason, part: Kernel.to_string(term)}}
+
+  defp purl_response(:error), do: :error
 
   defimpl String.Chars do
     @impl String.Chars
