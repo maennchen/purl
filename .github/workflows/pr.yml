@@ -16,3 +16,8 @@ jobs:
     name: "Docs"
 
     uses: ./.github/workflows/part_docs.yml
+
+  dependency_review:
+    name: "Dependency Review"
+
+    uses: ./.github/workflows/part_dependency_review.yml
