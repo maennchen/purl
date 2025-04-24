@@ -7,6 +7,9 @@ env:
   BUILD_EMBEDDED: true
   ERL_FLAGS: "-enable-feature maybe_expr"
 
+permissions:
+  contents: read
+
 jobs:
   detectToolVersions:
     name: "Detect Tool Versions"
@@ -216,6 +219,10 @@ jobs:
     env:
       MIX_ENV: dev
 
+    permissions:
+      contents: read
+      security-events: write
+
     steps:
       - uses: actions/checkout@v4
       - uses: erlef/setup-beam@v1
@@ -234,7 +241,12 @@ jobs:
       - run: mix deps.get
       - run: mix deps.compile
       - run: mix compile --warning-as-errors
-      - run: mix credo --strict
+      - run: mix credo --strict --format sarif > results.sarif
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
+        with:
+          sarif_file: results.sarif
+          category: credo
 
   dialyxir:
     name: mix dialyzer

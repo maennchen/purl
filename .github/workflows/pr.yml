@@ -16,10 +16,3 @@ jobs:
     name: "Docs"
 
     uses: ./.github/workflows/part_docs.yml
-
-  dependabot:
-    name: "Dependabot"
-
-    needs: ["test", "docs"]
-
-    uses: ./.github/workflows/part_dependabot.yml

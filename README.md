@@ -4,6 +4,7 @@
 [![Documentation badge](https://img.shields.io/badge/Documentation-ff69b4)][docs]
 [![.github/workflows/branch_main.yml](https://github.com/maennchen/purl/actions/workflows/branch_main.yml/badge.svg)](https://github.com/maennchen/purl/actions/workflows/branch_main.yml)
 [![Coverage Status](https://coveralls.io/repos/github/maennchen/purl/badge.svg?branch=main)](https://coveralls.io/github/maennchen/purl?branch=main)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/maennchen/purl/badge)](https://scorecard.dev/viewer/?uri=github.com/maennchen/purl)
 
 > Implementation of the purl (package url) specification.
 
@@ -34,7 +35,8 @@ end
 
 ## License
 
-Copyright 2023 JOSHMARTIN GmbH
+Copyright 2023 JOSHMARTIN GmbH  
+Copyright 2025 Erlang Ecosystem Foundation
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
