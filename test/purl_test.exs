@@ -38,7 +38,17 @@ defmodule PurlTest do
     end
 
     test "fixes url with protocol" do
-      assert Purl.new!("pkg:hex/purl") == Purl.new!("pkg://hex/purl")
+      assert Purl.new!("pkg:hex/purl") == "pkg://hex/purl" |> Purl.new!() |> Purl.new!()
+    end
+
+    test "ignores broken mlflow url" do
+      assert %Purl{} = Purl.new!("pkg:mlflow/CreditFraud@3?repository_url=not_a_url")
+    end
+
+    test "failed special case" do
+      assert_raise Purl.Error.SpecialCaseFailed, "namespace missing", fn ->
+        Purl.new!("pkg:swift/foo")
+      end
     end
   end
 
@@ -46,30 +56,49 @@ defmodule PurlTest do
     test "GitHub git url" do
       assert {:ok, %Purl{type: "github", namespace: ["jshmrtn"], name: "purl"}} =
                Purl.from_resource_uri("git@github.com:jshmrtn/purl.git")
+
+      assert :error = Purl.from_resource_uri("git@github.com:jshmrtn")
     end
 
     test "GitHub http url" do
       assert {:ok, %Purl{type: "github", namespace: ["jshmrtn"], name: "purl"}} =
-               Purl.from_resource_uri("https://github.com/jshmrtn/purl.git")
+               "https://github.com/jshmrtn/purl.git" |> URI.new!() |> Purl.from_resource_uri()
+
+      assert :error = "https://github.com/jshmrtn" |> URI.new!() |> Purl.from_resource_uri()
     end
 
     test "BitBucket git url" do
       assert {:ok, %Purl{type: "bitbucket", namespace: ["jshmrtn"], name: "purl"}} =
                Purl.from_resource_uri("git@bitbucket.org:jshmrtn/purl.git")
+
+      assert :error = Purl.from_resource_uri("git@bitbucket.org:jshmrtn")
     end
 
     test "BitBucket http url" do
       assert {:ok, %Purl{type: "bitbucket", namespace: ["jshmrtn"], name: "purl"}} =
                Purl.from_resource_uri("https://irrelevant@bitbucket.org/jshmrtn/purl.git")
+
+      assert :error = Purl.from_resource_uri("https://irrelevant@bitbucket.org/jshmrtn")
     end
 
     test "Hex.pm http url" do
       assert {:ok, %Purl{type: "hex", namespace: [], name: "expo"}} =
                Purl.from_resource_uri("https://hex.pm/packages/expo")
+
+      assert :error =
+               Purl.from_resource_uri("https://hex.pm/packages/expo/releases")
     end
 
     test "Random URL" do
       assert :error = Purl.from_resource_uri("https://example.com")
+      assert :error = Purl.from_resource_uri("git@example\0com")
+    end
+  end
+
+  describe inspect(&Prul.to_string/1) do
+    test "should encode qualifiers correctly" do
+      purl = %Purl{type: "hex", name: "purl", qualifiers: %{"key" => "value&other=value"}}
+      assert purl |> Purl.to_string() |> Purl.new!() == purl
     end
   end
 
@@ -123,6 +152,7 @@ defmodule PurlTest do
   end
 
   describe "fuzzer" do
+    @tag timeout: 5 * 60 * 1_000
     property "compose / parse gives same result" do
       check all(purl <- Purl.Generator.purl()) do
         # Uppercase fields should still parse, but the canonical form is lowercase

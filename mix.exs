@@ -2,20 +2,21 @@
 defmodule Purl.MixProject do
   use Mix.Project
 
-  @version "0.2.0"
+  {:ok, [{:application, :purl, props}]} = :file.consult(~c"src/purl.app.src")
+  @props Keyword.take(props, [:applications, :description, :env, :mod, :licenses, :vsn])
+
   @source_url "https://github.com/maennchen/purl"
-  @description "Implementation of the purl (package url) specification"
 
   def project do
     [
       app: :purl,
-      version: @version,
+      version: to_string(@props[:vsn]),
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),
       test_coverage: [tool: ExCoveralls],
-      description: @description,
+      description: to_string(@props[:description]),
       dialyzer:
         [list_unused_filters: true] ++
           if (System.get_env("DIALYZER_PLT_PRIV") || "false") in ["1", "true"] do
@@ -37,14 +38,24 @@ defmodule Purl.MixProject do
 
   defp package do
     %{
-      licenses: ["Apache-2.0"],
+      licenses: Enum.map(@props[:licenses], &to_string/1),
       maintainers: ["Jonatan Männchen"],
       links: %{
         "GitHub" => @source_url,
         "Changelog" => @source_url <> "/releases",
         "Issues" => @source_url <> "/issues",
         "purl Specification" => "https://github.com/package-url/purl-spec"
-      }
+      },
+      build_tools: ["rebar3", "mix"],
+      files: [
+        "include",
+        "lib",
+        "LICENSE*",
+        "mix.exs",
+        "README*",
+        "rebar.config",
+        "src"
+      ]
     }
   end
 
@@ -55,9 +66,10 @@ defmodule Purl.MixProject do
   defp docs do
     [
       source_url: @source_url,
-      source_ref: "v" <> @version,
+      source_ref: "v" <> to_string(@props[:vsn]),
       main: "readme",
-      extras: ["README.md"]
+      extras: ["README.md"],
+      groups_for_modules: [Erlang: [~r/purl/], "Elixir": [~r/^Purl/]]
     ]
   end
 
