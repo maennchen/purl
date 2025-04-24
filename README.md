@@ -5,6 +5,7 @@
 [![.github/workflows/branch_main.yml](https://github.com/erlef/purl/actions/workflows/branch_main.yml/badge.svg)](https://github.com/erlef/purl/actions/workflows/branch_main.yml)
 [![Coverage Status](https://coveralls.io/repos/github/erlef/purl/badge.svg?branch=main)](https://coveralls.io/github/erlef/purl?branch=main)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/erlef/purl/badge)](https://scorecard.dev/viewer/?uri=github.com/erlef/purl)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10483/badge)](https://www.bestpractices.dev/projects/10483)
 
 > Implementation of the purl (package url) specification.
 
