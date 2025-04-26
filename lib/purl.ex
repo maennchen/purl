@@ -238,10 +238,16 @@ defmodule Purl do
   * Hex.pm package URL
 
   """
-  @spec from_resource_uri(uri :: String.t() | URI.t()) :: {:ok, t()} | :error
-  def from_resource_uri(uri)
-  def from_resource_uri(%URI{} = uri), do: from_resource_uri(URI.to_string(uri))
-  def from_resource_uri(uri), do: uri |> :purl.from_resource_uri() |> purl_response()
+  @spec from_resource_uri(uri :: String.t() | URI.t(), fallback_version :: Version.t() | String.t() | nil) ::
+          {:ok, t()} | :error
+  def from_resource_uri(uri, fallback_version \\ nil), do: _from_resource_uri(uri, fallback_version)
+
+  @spec _from_resource_uri(uri :: String.t() | URI.t(), fallback_version :: Version.t() | String.t() | nil | :undefined) ::
+          {:ok, t()} | :error
+  defp _from_resource_uri(uri, %Version{} = version), do: _from_resource_uri(uri, Version.to_string(version))
+  defp _from_resource_uri(uri, nil), do: _from_resource_uri(uri, :undefined)
+  defp _from_resource_uri(%URI{} = uri, fallback_version), do: _from_resource_uri(URI.to_string(uri), fallback_version)
+  defp _from_resource_uri(uri, fallback_version), do: uri |> :purl.from_resource_uri(fallback_version) |> purl_response()
 
   @doc false
   @spec to_record(purl :: t()) :: :purl.t()

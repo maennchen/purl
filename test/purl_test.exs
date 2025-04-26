@@ -54,29 +54,144 @@ defmodule PurlTest do
 
   describe inspect(&Purl.from_resource_uri/1) do
     test "GitHub git url" do
-      assert {:ok, %Purl{type: "github", namespace: ["jshmrtn"], name: "purl"}} =
+      assert {:ok,
+              %Purl{
+                type: "github",
+                namespace: ["jshmrtn"],
+                name: "purl",
+                qualifiers: %{
+                  "vcs_url" => "git+https://github.com/jshmrtn/purl.git",
+                  "download_url" => "https://github.com/jshmrtn/purl/archive/HEAD.tar.gz"
+                }
+              }} =
                Purl.from_resource_uri("git@github.com:jshmrtn/purl.git")
+
+      assert {:ok,
+              %Purl{
+                type: "github",
+                namespace: ["jshmrtn"],
+                name: "purl",
+                version: "v1.2.3",
+                qualifiers: %{
+                  "vcs_url" => "git+https://github.com/jshmrtn/purl.git",
+                  "download_url" => "https://github.com/jshmrtn/purl/archive/v1.2.3.tar.gz"
+                }
+              }} =
+               Purl.from_resource_uri("git@github.com:jshmrtn/purl.git", "v1.2.3")
 
       assert :error = Purl.from_resource_uri("git@github.com:jshmrtn")
     end
 
     test "GitHub http url" do
-      assert {:ok, %Purl{type: "github", namespace: ["jshmrtn"], name: "purl"}} =
+      assert {:ok,
+              %Purl{
+                type: "github",
+                namespace: ["jshmrtn"],
+                name: "purl",
+                version: "HEAD",
+                qualifiers: %{
+                  "vcs_url" => "git+https://github.com/jshmrtn/purl.git",
+                  "download_url" => "https://github.com/jshmrtn/purl/archive/HEAD.tar.gz"
+                }
+              }} =
                "https://github.com/jshmrtn/purl.git" |> URI.new!() |> Purl.from_resource_uri()
+
+      assert {:ok,
+              %Purl{
+                type: "github",
+                namespace: ["jshmrtn"],
+                name: "purl",
+                version: "main",
+                qualifiers: %{
+                  "vcs_url" => "git+https://github.com/jshmrtn/purl.git",
+                  "download_url" => "https://github.com/jshmrtn/purl/archive/main.tar.gz"
+                }
+              }} =
+               "https://github.com/jshmrtn/purl/tree/main/.github" |> URI.new!() |> Purl.from_resource_uri()
+
+      assert {:ok,
+              %Purl{
+                type: "github",
+                namespace: ["jshmrtn"],
+                name: "purl",
+                version: "v1.2.3",
+                qualifiers: %{
+                  "vcs_url" => "git+https://github.com/jshmrtn/purl.git",
+                  "download_url" => "https://github.com/jshmrtn/purl/archive/v1.2.3.tar.gz"
+                }
+              }} =
+               "https://github.com/jshmrtn/purl/releases/tag/v1.2.3" |> URI.new!() |> Purl.from_resource_uri()
+
+      assert {:ok,
+              %Purl{
+                type: "github",
+                namespace: ["jshmrtn"],
+                name: "purl",
+                version: "v1.2.3",
+                qualifiers: %{
+                  "vcs_url" => "git+https://github.com/jshmrtn/purl.git",
+                  "download_url" => "https://github.com/jshmrtn/purl/archive/v1.2.3.tar.gz"
+                }
+              }} =
+               "https://github.com/jshmrtn/purl.git" |> URI.new!() |> Purl.from_resource_uri("v1.2.3")
 
       assert :error = "https://github.com/jshmrtn" |> URI.new!() |> Purl.from_resource_uri()
     end
 
     test "BitBucket git url" do
-      assert {:ok, %Purl{type: "bitbucket", namespace: ["jshmrtn"], name: "purl"}} =
+      assert {:ok,
+              %Purl{
+                type: "bitbucket",
+                namespace: ["jshmrtn"],
+                name: "purl",
+                qualifiers: %{
+                  "vcs_url" => "git+https://bitbucket.org/jshmrtn/purl.git",
+                  "download_url" => "https://bitbucket.org/jshmrtn/purl/get/HEAD.tar.gz"
+                }
+              }} =
                Purl.from_resource_uri("git@bitbucket.org:jshmrtn/purl.git")
+
+      assert {:ok,
+              %Purl{
+                type: "bitbucket",
+                namespace: ["jshmrtn"],
+                name: "purl",
+                version: "v1.2.3",
+                qualifiers: %{
+                  "vcs_url" => "git+https://bitbucket.org/jshmrtn/purl.git",
+                  "download_url" => "https://bitbucket.org/jshmrtn/purl/get/v1.2.3.tar.gz"
+                }
+              }} =
+               Purl.from_resource_uri("git@bitbucket.org:jshmrtn/purl.git", "v1.2.3")
 
       assert :error = Purl.from_resource_uri("git@bitbucket.org:jshmrtn")
     end
 
     test "BitBucket http url" do
-      assert {:ok, %Purl{type: "bitbucket", namespace: ["jshmrtn"], name: "purl"}} =
+      assert {:ok,
+              %Purl{
+                type: "bitbucket",
+                namespace: ["jshmrtn"],
+                name: "purl",
+                qualifiers: %{
+                  "vcs_url" => "git+https://bitbucket.org/jshmrtn/purl.git",
+                  "download_url" => "https://bitbucket.org/jshmrtn/purl/get/HEAD.tar.gz"
+                }
+              }} =
                Purl.from_resource_uri("https://irrelevant@bitbucket.org/jshmrtn/purl.git")
+
+      assert {:ok,
+              %Purl{
+                type: "bitbucket",
+                namespace: ["jshmrtn"],
+                name: "purl",
+                version: "v1.2.3",
+                qualifiers: %{
+                  "vcs_url" => "git+https://bitbucket.org/jshmrtn/purl.git",
+                  "download_url" => "https://bitbucket.org/jshmrtn/purl/get/v1.2.3.tar.gz"
+                }
+              }} =
+               Purl.from_resource_uri("https://irrelevant@bitbucket.org/jshmrtn/purl.git", "v1.2.3")
 
       assert :error = Purl.from_resource_uri("https://irrelevant@bitbucket.org/jshmrtn")
     end
@@ -85,8 +200,18 @@ defmodule PurlTest do
       assert {:ok, %Purl{type: "hex", namespace: [], name: "expo"}} =
                Purl.from_resource_uri("https://hex.pm/packages/expo")
 
-      assert :error =
-               Purl.from_resource_uri("https://hex.pm/packages/expo/releases")
+      assert {:ok,
+              %Purl{
+                type: "hex",
+                namespace: [],
+                name: "expo",
+                version: "1.0.0",
+                qualifiers: %{"download_url" => "https://repo.hex.pm/tarballs/expo/1.0.0.tar"}
+              }} =
+               Purl.from_resource_uri("https://hex.pm/packages/expo/1.0.0")
+
+      assert {:ok, %Purl{type: "hex", namespace: [], name: "expo", version: nil}} =
+               Purl.from_resource_uri("https://hex.pm/packages/expo/versions")
     end
 
     test "Random URL" do
