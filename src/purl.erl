@@ -56,7 +56,7 @@ https://github.com/package-url/purl-spec
     t/0
 ]).
 
--export([to_binary/1, to_uri/1, new/1, from_resource_uri/1]).
+-export([to_binary/1, to_uri/1, new/1, from_resource_uri/1, from_resource_uri/2]).
 
 ?DOC(#{since => <<"0.3.0">>}).
 -type parse_error() ::
@@ -251,6 +251,17 @@ Convert known URLs to purl
 
 """).
 ?DOC(#{since => <<"0.3.0">>}).
+-spec from_resource_uri(Uri, FallbackVersion) -> {ok, t()} | error when
+    Uri :: uri_string:uri_map() | uri_string:uri_string(),
+    FallbackVersion :: undefined | binary().
+from_resource_uri(Uri, FallbackVersion) -> purl_resource:from_uri(Uri, FallbackVersion).
+
+?DOC("""
+Convert known URLs to purl
+
+See `from_resource_uri/2`.
+""").
+?DOC(#{since => <<"0.3.0">>}).
 -spec from_resource_uri(Uri) -> {ok, t()} | error when
     Uri :: uri_string:uri_map() | uri_string:uri_string().
-from_resource_uri(Uri) -> purl_resource:from_uri(Uri).
+from_resource_uri(Uri) -> from_resource_uri(Uri, undefined).
